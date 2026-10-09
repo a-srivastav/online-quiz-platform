@@ -1,6 +1,9 @@
+-- Create the database with Unicode support, then select it for the table definitions below.
 CREATE DATABASE IF NOT EXISTS quiz_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE quiz_platform;
 
+-- Account records shared by administrators, quiz creators, and participants.
+-- The unique email prevents duplicate accounts; role limits values to supported account types.
 CREATE TABLE IF NOT EXISTS users (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(120) NOT NULL,
@@ -9,6 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
   role ENUM('ADMIN','CREATOR','PARTICIPANT') NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Quizzes belong to a creator. Deleting that user also removes their quizzes.
+-- The duration check keeps quizzes within the application's allowed time range.
 CREATE TABLE IF NOT EXISTS quizzes (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   creator_id BIGINT NOT NULL,
@@ -20,6 +26,9 @@ CREATE TABLE IF NOT EXISTS quizzes (
   CONSTRAINT fk_quiz_creator FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT chk_quiz_duration CHECK (duration_minutes BETWEEN 1 AND 180)
 );
+
+-- Each question belongs to one quiz and provides four multiple-choice options.
+-- Foreign-key cascading removes questions with their quiz; checks validate the answer key and points.
 CREATE TABLE IF NOT EXISTS questions (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   quiz_id BIGINT NOT NULL,
@@ -33,6 +42,9 @@ CREATE TABLE IF NOT EXISTS questions (
   CONSTRAINT chk_correct_option CHECK (correct_option IN ('A','B','C','D')),
   CONSTRAINT chk_question_points CHECK (points > 0)
 );
+
+-- One row represents a participant's attempt, including its score and lifecycle status.
+-- Quiz and participant foreign keys keep attempts connected to existing records.
 CREATE TABLE IF NOT EXISTS quiz_attempts (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   quiz_id BIGINT NOT NULL,
@@ -45,6 +57,9 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
   CONSTRAINT fk_attempt_quiz FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
   CONSTRAINT fk_attempt_participant FOREIGN KEY (participant_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Stores the selected option and awarded points for each question in an attempt.
+-- The unique pair prevents the same question from being recorded twice for one attempt.
 CREATE TABLE IF NOT EXISTS answers (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   attempt_id BIGINT NOT NULL,
@@ -57,6 +72,9 @@ CREATE TABLE IF NOT EXISTS answers (
   CONSTRAINT fk_answer_question FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
   CONSTRAINT uq_attempt_question UNIQUE (attempt_id, question_id)
 );
+
+-- Stores the final percentage and point totals for a completed attempt.
+-- A unique attempt_id enforces one result record per attempt.
 CREATE TABLE IF NOT EXISTS results (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   attempt_id BIGINT NOT NULL UNIQUE,

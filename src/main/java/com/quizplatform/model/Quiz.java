@@ -1,5 +1,6 @@
 package com.quizplatform.model;
 import java.time.LocalDateTime;
+/** Holds a quiz's details, creator ownership, duration, and publication state. */
 public class Quiz {
     private long id, creatorId; private String title, description; private int durationMinutes; private boolean published; private LocalDateTime createdAt;
     public Quiz(long id,long creatorId,String title,String description,int durationMinutes,boolean published,LocalDateTime createdAt){this.id=id;this.creatorId=creatorId;this.title=title;this.description=description;this.durationMinutes=durationMinutes;this.published=published;this.createdAt=createdAt;}

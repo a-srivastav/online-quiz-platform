@@ -1,4 +1,5 @@
 package com.quizplatform.model;
+/** Holds a multiple-choice question, its options, correct choice, and point value. */
 public class Question {
     private long id,quizId; private String text,optionA,optionB,optionC,optionD,correctOption; private int points;
     public Question(long id,long quizId,String text,String optionA,String optionB,String optionC,String optionD,String correctOption,int points){this.id=id;this.quizId=quizId;this.text=text;this.optionA=optionA;this.optionB=optionB;this.optionC=optionC;this.optionD=optionD;this.correctOption=correctOption;this.points=points;}
